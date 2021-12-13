@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +24,7 @@ import com.airline.service.FlightService;
 
 @RestController
 @RequestMapping("/v1/api/flight")
+@CrossOrigin(origins = "*") 
 public class FlightController {
 	
 	@Autowired
@@ -73,10 +75,17 @@ public class FlightController {
 	 * null; }
 	 */
 	
-	@CacheEvict(key= "*id", value="flightStore")
+	//@CacheEvict(key= "*id", value="flightStore")
 	@DeleteMapping("/deleteFlight/{id}")
-	public void deleteFlightById(@PathVariable int id) {
-		flightService.deleteFlight(id);
+	public String deleteFlightById(@PathVariable int id) {
+		if(null != flightService.findFlightById(id)) {
+			flightService.deleteFlight(id);
+			return "Flight has beed removed.";
+		}
+		else {
+			System.out.println("Flight is not available.");
+			throw new FlightNotAvailableException("Flight does not exist.");
+		}
 	}
 	
 	
